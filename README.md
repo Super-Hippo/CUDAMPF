@@ -3,8 +3,11 @@ the source code of our project
 ==========================================
 1. Requirement
 ** OS: Linux
+
 ** Compilers: GCC, G++, NVCC
+
 ** CUDA: Version 7.0
+
 ** Hardware: device with Compute Capability 3.5 or higher (at least GK110 Kepler architecture)
 
 2. How to use this project
