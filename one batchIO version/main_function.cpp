@@ -240,9 +240,61 @@ int main(int argc, char* argv[])
 					    seq_1D, offset, seq_len,
 					    iLen, sum, pValue,
 					    rb.warps, opt_Reg, GRID, BLOCK);			/* optimal warps per block; 32 reg per thread (based on test); */	
-				break;
+			break;
+		case 5:
+			if(hmm->M <= 300)
+			{
+				rb = get_opt_MSV(hmm->msvQ, MAX_SMEM, WARP_SIZE);
+    				printf("SMEM MSV::warps per block: %d\n", rb.warps);
+    				printf("SMEM MSV::resident blocks per SMX: %d\n", rb.res_blocks);
+    				handle = read_kernel("SMEM_MSV.cuh");
+    				opt_Reg = (65536/(WARP_SIZE * rb.warps * rb.res_blocks) > 255) ? 255 : (65536/(WARP_SIZE * rb.warps * rb.res_blocks));
+    				printf("Available registers per thread is: %d\n", opt_Reg);
+    				GRID = dim3(1, rb.res_blocks * SMX, 1);
+      				BLOCK = dim3(WARP_SIZE, rb.warps, 1);
+				RTC_MSV(number, handle, hmm,
+					seq_1D, offset, seq_len,
+					iLen, sum, pValue,
+					rb.warps, opt_Reg, GRID, BLOCK);
+			} else {
+				handle = read_kernel("LMEM_MSV.cuh");
+				opt_Reg = 64;
+				GRID = dim3(1, SMX, 1);
+				BLOCK = dim3(WARP_SIZE, 32, 1);
+				RTC_MSV(number, handle, hmm,
+					seq_1D, offset, seq_len,
+					iLen, sum, pValue,
+					32, opt_Reg, GRID, BLOCK);
+			}
+			break;
+		case 6:
+			if(hmm->M <= 200)
+			{
+				rb = get_opt_VIT(hmm->vitQ, MAX_SMEM, WARP_SIZE);
+	    			printf("SMEM VIT::warps per block: %d\n", rb.warps);
+	    			printf("SMEM VIT::resident blocks per SMX: %d\n", rb.res_blocks);
+	    			handle = read_kernel("SMEM_VIT.cuh");
+	    			opt_Reg = (65536/(WARP_SIZE * rb.warps * rb.res_blocks) > 255) ? 255 : (65536/(WARP_SIZE * rb.warps * rb.res_blocks));
+	    			printf("Available registers per thread is: %d\n", opt_Reg);
+	    			GRID = dim3(1, rb.res_blocks * SMX, 1);
+	      			BLOCK = dim3(WARP_SIZE, rb.warps, 1);
+				RTC_VIT(number, handle, hmm,
+					seq_1D, offset, seq_len,
+					iLen, sum, pValue,
+					rb.warps, opt_Reg, GRID, BLOCK);
+			} else {
+				handle = read_kernel("LMEM_VIT.cuh");
+				opt_Reg = 64;
+				GRID = dim3(1, SMX, 1);
+				BLOCK = dim3(WARP_SIZE, 32, 1);
+				RTC_VIT(number, handle, hmm,
+					seq_1D, offset, seq_len,
+					iLen, sum, pValue,
+					32, opt_Reg, GRID, BLOCK);
+			}
+			break;
 		default:
-				break;
+			break;
 	}
 
 	/* ***************************************** */
