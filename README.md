@@ -2,7 +2,7 @@
 the source code of our project
 ==========================================
 1. Requirement
-<br /> OS: Linux
+<br /> OS: Linux <br />
 ** Compilers: GCC, G++, NVCC
 ** CUDA: Version 7.0
 ** Hardware: device with Compute Capability 3.5 or higher (at least GK110 Kepler architecture)
