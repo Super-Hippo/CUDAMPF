@@ -31,8 +31,8 @@ HMMER_PROFILE* hmmer_profile_Create(int seq_size, int hmm_size)
 	/* ================================================== */
 
 	om->M = hmm_size;                                      	/* number of nodes in the model */
-	om->MU = (float*)malloc(3 * sizeof(float));     		/* respectively, for MSV, VIT and FWD */
-	om->LAMBDA = (float*)malloc(3 * sizeof(float));			/* respectively, for MSV, VIT and FWD */
+	om->MU = (double*)malloc(3 * sizeof(double));     		/* respectively, for MSV, VIT and FWD */
+	om->LAMBDA = (double*)malloc(3 * sizeof(double));			/* respectively, for MSV, VIT and FWD */
 	om->f = (float*)malloc(20 * sizeof(float));     		/* above 3 pointer get their own space which is not included in om's space */
 	if (p7_AminoFrequencies(om->f) != 1) printf("error\n");	/* For protein models, default iid background frequencies */
 
@@ -71,15 +71,18 @@ HMMER_PROFILE* hmmer_profile_Create(int seq_size, int hmm_size)
 			om->log_tran_32bits[i][j] = 0.0f;
 	}
 
-	/* =============================================================== */
-	/* MSVFilter uses scaled, biased uchars: 16x unsigned byte vectors */
-	/* =============================================================== */
+	/* ========================================================================= */
+	/* MSVFilter.SSVFilter uses scaled, biased uchars: 16x unsigned byte vectors */
+	/* ========================================================================= */
 
 	om->msvQ = NQB(hmm_size);				printf("msv:%d\n", om->msvQ);										/* 128x parallel */
 	om->msv_vec = (__32uint__*)malloc(om->msvQ * PROTEIN_TYPE * sizeof(__32uint__));
+	om->ssv_vec = (__32uint__*)malloc(om->msvQ * PROTEIN_TYPE * sizeof(__32uint__));		/*ssv*/
 
-	for (int j = 0; j < om->msvQ * PROTEIN_TYPE; j++)
-		memset(om->msv_vec[j], 0, sizeof(om->msv_vec[j]));  						/* initialization: each "msv_vec[j]" is an array consist of 32 int values */
+	for (int j = 0; j < om->msvQ * PROTEIN_TYPE; j++) {
+		memset(om->msv_vec[j], 0, sizeof(om->msv_vec[j]));  	/* initialization: each "msv_vec[j]" is an array consist of 32 int values */
+		memset(om->ssv_vec[j], 0, sizeof(om->ssv_vec[j]));		/*ssv*/
+	}
 
 	om->tbm_b = 0;
 	om->tec_b = 0;
@@ -103,13 +106,13 @@ HMMER_PROFILE* hmmer_profile_Create(int seq_size, int hmm_size)
 	om->vit_vec = (__32int__*)malloc(om->vitQ * PROTEIN_TYPE * sizeof(__32int__));	/* allocate (vitQ * PROTEIN_TYPE) arrays */
 	om->trans_vec = (__32int__*)malloc(om->vitQ * TRANS_TYPE * sizeof(__32int__));	/* allocate (vitQ * TRANS_TYPE) arrays */
 
-	om->ncj_move = NULL;							/* getting ncj_move out of VIT kernel (Temporary: we may move it into kernel again) */
+	om->ncj_move = NULL;	/* getting ncj_move out of VIT kernel (Temporary: we may move it into kernel again) */
 
 	for (int j = 0; j < om->vitQ * PROTEIN_TYPE; j++)
-		memset(om->vit_vec[j], 0, sizeof(om->vit_vec[j]));							/* initialize those arrays */
+		memset(om->vit_vec[j], 0, sizeof(om->vit_vec[j]));		/* initialize those arrays */
 
 	for (int j = 0; j < om->vitQ * TRANS_TYPE; j++)
-		memset(om->trans_vec[j], 0, sizeof(om->trans_vec[j]));						/* initialize those arrays */
+		memset(om->trans_vec[j], 0, sizeof(om->trans_vec[j]));	/* initialize those arrays */
 
 	om->scale_w = 0.0f;
 	om->base_w = 0;
@@ -232,9 +235,10 @@ int xTrans(HMMER_PROFILE *hmm)
 /* mf_conversion() */
 int mf_conversion(HMMER_PROFILE *hmm)
 {
-	float   max_rs = 0.0;                           	/* maximum residue score: used for unsigned emission score bias */
-	int i, j, q, z;                                     /* index */
-	union { __32uint__ v; unsigned char i[128]; } tmp;  /* use union for following assignment to each unsigned char value */
+	float   max_rs = 0.0;                           		/* maximum residue score: used for unsigned emission score bias */
+	int i, j, q, z;                                     	/* index */
+	union { __32uint__ v; unsigned char i[128]; } tmp;  	/* use union for following assignment to each unsigned char value */
+	union { __32uint__ v; unsigned char i[128]; } tmp_ssv;	/* for SSV */
 
 	/* Here, we get the 'max_rs' values */
 	for (i = 0; i <= hmm->M; i++) 
@@ -249,16 +253,25 @@ int mf_conversion(HMMER_PROFILE *hmm)
 	hmm->base_b = 190;
 	hmm->bias_b = unbiased_byteify(hmm, -1.0 * max_rs);              /* here, we use 'max_rs' */
 
+	/* only for SSV */
+	char val_1 = (char)(hmm->bias_b + 127);
+	char val_2 = 127;
+
 	/* V3: Striped Match emission cost */
 	for (i = 0; i < PROTEIN_TYPE; i++)
 	{
 		for (q = 0, j = 1; q < hmm->msvQ; q++, j++)
 		{
-			for (z = 0; z < 128; z++)
+			for (z = 0; z < 128; z++) {
 				tmp.i[z] = ((j + z * hmm->msvQ <= hmm->M) ? biased_byteify(hmm, hmm->mat_32bits[j + z * hmm->msvQ][i]) : 255);
+				tmp_ssv.i[z] = ((((unsigned char)val_1 - (unsigned char)tmp.i[z]) < 0) ? 0 : ((unsigned char)val_1 - (unsigned char)tmp.i[z])) ^ val_2;
+			}
 
-			for (int l = 0; l < 32; l++)
-				hmm->msv_vec[i * hmm->msvQ + q][l] = tmp.v[l];	/* array copy */
+			for (int l = 0; l < 32; l++) {
+				hmm->msv_vec[i * hmm->msvQ + q][l] = tmp.v[l];		/* array copy */
+				hmm->ssv_vec[i * hmm->msvQ + q][l] = tmp_ssv.v[l];	/*ssv*/
+				//printf("%d ", tmp_ssv.v[l]);
+			}
 		}
 	}
 

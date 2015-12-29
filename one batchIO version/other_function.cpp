@@ -5,14 +5,17 @@
 #include "header_def.h"
 
 
-/**/
-/* Transfer seq into int value for optimization in Kernel
-1. padding to 128x
-2. unsigned char for each residue
-3. union {unsigned char; unsigned char [4];}
-4. store as 2-D array for padding seq
-5. store length of padding seq as 1-D array
-*/
+/* Function:  seq_Padding()
+ * Synopsis:  Transfer seq into int value for optimization in Kernel
+ *
+ * Purpose: 1. padding to 128x
+ * 			2. unsigned char for each residue
+ *			3. union {unsigned char; unsigned char [4];}
+ *			4. store as 2-D array for padding seq
+ *			5. store length of padding seq as 1-D array
+ *
+ * Returns: memory size for 1-D allocation
+ */
 unsigned int seq_Padding(unsigned int** iSeq, unsigned int* iLen, char** seq, unsigned int* length, int num)
 {
 	unsigned int i, j;
@@ -43,7 +46,6 @@ unsigned int seq_Padding(unsigned int** iSeq, unsigned int* iLen, char** seq, un
 			tmp.res[2] = (j * 4 + 2 < length[i]) ? Amino_Offset(seq[i][j * 4 + 2]) : 31;
 			tmp.res[3] = (j * 4 + 3 < length[i]) ? Amino_Offset(seq[i][j * 4 + 3]) : 31;
 			iSeq[i][j] = tmp.vec;
-			//iSeq[sum + j] = tmp.vec;	/* assign one INT */
 		}
 
 		sum += c * 32;					/* for allocating 1D iSeq */
@@ -52,9 +54,12 @@ unsigned int seq_Padding(unsigned int** iSeq, unsigned int* iLen, char** seq, un
 	return sum;		// for 1D array alloction later
 }
 
-/*****************************************************************
-* 2. Standard iid null model ("null1")
-*****************************************************************/
+/* Function:  NullOne()
+ * Synopsis:  Standard iid null model ("null1")
+ * Same as HMMER code
+ *
+ * Returns: None
+ */
 int NullOne(unsigned int L, float *ret_sc)
 {
 	float p1 = 0.0f;
@@ -66,7 +71,11 @@ int NullOne(unsigned int L, float *ret_sc)
 	return fileOK;
 }
 
-/* Function:  esl_gumbel_surv() */
+/* Function:  esl_gumbel_surv() 
+ * Same as HMMER code
+ *
+ * Returns: None
+ */
 double esl_gumbel_surv(double x, double mu, double lambda)
 {
 	double y = lambda*(x - mu);
@@ -77,9 +86,12 @@ double esl_gumbel_surv(double x, double mu, double lambda)
 	else                       return 1 - exp(ey);
 }
 
-
-/* For protein models, default iid background frequencies */
-/* Function:  p7_AminoFrequencies() */
+/* Function:  p7_AminoFrequencies()
+ * Synopsis:  For protein models, default iid background frequencies
+ * Same as HMMER code
+ *
+ * Returns: None
+ */
 int p7_AminoFrequencies(float *f)
 {
 	f[0] = 0.0787945;   /* A */
@@ -106,13 +118,16 @@ int p7_AminoFrequencies(float *f)
 	return fileOK;
 }
 
-
-/* Implement roundf() function
-* Example: roundf(2.1) = 2; roundf(2.6) = 3
-*      roundf(-2.1) = -2; roundf(-2.6) = -3
-* Using existing functions: floor(); ceil();
-* Example: floor(2.6) = 2; ceil(2.1) = 3
-*/
+/* Function:  round_DIY()
+ * Synopsis:  Implement roundf() function
+ * 
+ * Example:	roundf(2.1) = 2; roundf(2.6) = 3
+ * 			roundf(-2.1) = -2; roundf(-2.6) = -3
+ *
+ * Example: floor(2.6) = 2; ceil(2.1) = 3
+ *
+ * Returns: None
+ */
 int round_DIY(float input)
 {
 	int r;
@@ -120,7 +135,11 @@ int round_DIY(float input)
 	return r;
 }
 
-/* FREE mem of HMM model */
+/* Function:  freeHMM()
+ * Synopsis:  FREE mem of HMM model
+ *
+ * Returns: None
+ */
 void freeHMM(HMMER_PROFILE* hmm)
 {
 	free(hmm->f);         /* 20 standard residues */
@@ -128,15 +147,19 @@ void freeHMM(HMMER_PROFILE* hmm)
 	free(hmm->LAMBDA);    /* 3 floats */
 
 	free(hmm);            /* free 'om', not include above extra space */
-	/* only include their pointer address: 3 float pointes: MU,LAMBDA,f */
+						  /* only include their pointer address: 3 float pointes: MU,LAMBDA,f */
 }
 
 
-/* get optimal grid for MSV with SMEM version */
-/* "Q" is the times of inner loop
+/* Function:  get_opt_MSV()
+ * Synopsis:  get optimal grid for MSV/SSV with SMEM version
+ *
+ * "Q" is the times of inner loop
  * "smem" is the maximum shared memory per SMX
  * "ws" is warp size
- */ 
+ *
+ * Returns: RIB_BLOCK
+ */
 RIB_BLOCK get_opt_MSV(int Q, int smem, int ws)
 {
 	RIB_BLOCK rb;
@@ -174,11 +197,15 @@ RIB_BLOCK get_opt_MSV(int Q, int smem, int ws)
 	return rb;
 }
 
-/* get optimal grid for VIT with SMEM version */
-/* "Q" is the times of inner loop
+/* Function:  get_opt_VIT()
+ * Synopsis:  get optimal grid for VIT with SMEM version
+ *
+ * "Q" is the times of inner loop
  * "smem" is the maximum shared memory per SMX
  * "ws" is warp size
- */ 
+ *
+ * Returns: RIB_BLOCK
+ */
 RIB_BLOCK get_opt_VIT(int Q, int smem, int ws)
 {
 	RIB_BLOCK rb;

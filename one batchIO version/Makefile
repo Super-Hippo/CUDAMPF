@@ -285,7 +285,7 @@ DEPS = header_def.h
 # -I will force compilor look in current dir for header files
 CFLAGS = -I.
 # all components for final executable
-OBJ = main_function.o model_config.o other_function.o read_file.o degenerate.o RTC_MSV.o RTC_VIT.o
+OBJ = main_function.o model_config.o other_function.o read_file.o degenerate.o RTC_MSV.o RTC_VIT.o RTC_SSV.o
 # special options in compile
 SPECIAL = -O3 -maxrregcount 64 --use_fast_math
 # special options in link

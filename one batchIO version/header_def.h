@@ -125,6 +125,7 @@ typedef struct hmmer_profile_s {
 	/* =============================================================== */
 	int   msvQ;      								/* number of vectors */
 	__32uint__ *msv_vec;                            /* striped pointer: each instance is a array of 32 int values */
+	__32uint__ *ssv_vec;		/* SSV */
 
 	/* Single Values */
 	unsigned int   tbm_b;                              /* constant B->Mk cost:    scaled log 2/M(M+1)       */
@@ -168,8 +169,8 @@ typedef struct hmmer_profile_s {
 	/* ========================================================= */
 
 	int    M;            /* model length                                      */
-	float  *MU;          /* parameters for getting P-value                    */
-	float  *LAMBDA;      /* parameters for getting P-value                    */
+	double  *MU;          /* parameters for getting P-value                    */
+	double  *LAMBDA;      /* parameters for getting P-value                    */
 	float  *f;           /* amino acid background frequencies                 */
 	float  nj;           /* expected # of J's: 0 or 1, uni vs. multihit       */
 
@@ -236,6 +237,10 @@ extern unsigned int simdlize_MSV(unsigned int);
 extern void simd_NCJ_MOVE(int*, int, HMMER_PROFILE*, unsigned int);
 
 /* launch kernels */
+extern void RTC_SSV(unsigned int, const char*, HMMER_PROFILE*,
+	     unsigned int*, unsigned int*, unsigned int*,
+	     unsigned int*, unsigned int, double*,
+	     int, int, dim3, dim3);
 extern void RTC_MSV(unsigned int, const char*, HMMER_PROFILE*,
 	     unsigned int*, unsigned int*, unsigned int*,
 	     unsigned int*, unsigned int, double*,

@@ -167,6 +167,8 @@ int main(int argc, char* argv[])
     double *pValue;		/* score got from device for each seq */
 	pValue = (double*)malloc(number * sizeof(double));
 	memset(pValue, 0, number * sizeof(double));
+        
+    int defect_RIB = 0;		/*This is for making up the defect of nvrtc compilor to avoid weird OUT OF RESOURCE */
 
     /* switchable grid & block */
     dim3 GRID;
@@ -241,6 +243,132 @@ int main(int argc, char* argv[])
 					    iLen, sum, pValue,
 					    rb.warps, opt_Reg, GRID, BLOCK);			/* optimal warps per block; 32 reg per thread (based on test); */	
 				break;
+
+		case 5: /* LMEM SSV only */
+				handle = read_kernel("LMEM_SSV.cuh");	/* read LMEM */
+				opt_Reg = 64;
+
+				if ((hmm->msvQ > 15)&&(hmm->msvQ < 19))
+				  defect_RIB = 28;
+				else
+				  defect_RIB = 32;
+				GRID = dim3(1, SMX, 1);
+				BLOCK = dim3(WARP_SIZE, defect_RIB, 1);		/* [FIXED] one block per SMX, 1024 threads per block */
+
+				RTC_SSV(number, handle, hmm,
+					    seq_1D, offset, seq_len,
+					    iLen, sum, pValue,
+					    defect_RIB, opt_Reg, GRID, BLOCK);	/* 32 warps per block; 64 reg per thread; */
+				break;
+
+		case 6:	/* SMEM SSV only */
+    			rb = get_opt_MSV(hmm->msvQ, MAX_SMEM, WARP_SIZE);			/* scalable for different device */
+    			printf("SMEM SSV::warps per block: %d\n", rb.warps);
+    			printf("SMEM SSV::resident blocks per SMX: %d\n", rb.res_blocks);
+
+    			handle = read_kernel("SMEM_SSV.cuh");	/* read SMEM */
+
+    			/* 65536 is hard-coded (need change to device property) */
+    			opt_Reg = (65536/(WARP_SIZE * rb.warps * rb.res_blocks) > 255) ? 255 : (65536/(WARP_SIZE * rb.warps * rb.res_blocks));
+    			printf("Available registers per thread is: %d\n", opt_Reg);
+
+    			GRID = dim3(1, rb.res_blocks * SMX, 1);
+      			BLOCK = dim3(WARP_SIZE, rb.warps, 1);		/* RIB & Resident blocks always change depending size of model for optimal */
+
+				RTC_SSV(number, handle, hmm,
+					    seq_1D, offset, seq_len,
+					    iLen, sum, pValue,
+					    rb.warps, opt_Reg, GRID, BLOCK);			/* optimal warps per block; 32 reg per thread (based on test); */		
+				break;
+		case 7:
+			if(hmm->M <= 300)
+			{
+				rb = get_opt_MSV(hmm->msvQ, MAX_SMEM, WARP_SIZE);
+    				printf("SMEM MSV::warps per block: %d\n", rb.warps);
+    				printf("SMEM MSV::resident blocks per SMX: %d\n", rb.res_blocks);
+    				handle = read_kernel("SMEM_MSV.cuh");
+    				opt_Reg = (65536/(WARP_SIZE * rb.warps * rb.res_blocks) > 255) ? 255 : (65536/(WARP_SIZE * rb.warps * rb.res_blocks));
+    				printf("Available registers per thread is: %d\n", opt_Reg);
+    				GRID = dim3(1, rb.res_blocks * SMX, 1);
+      				BLOCK = dim3(WARP_SIZE, rb.warps, 1);
+				RTC_MSV(number, handle, hmm,
+					seq_1D, offset, seq_len,
+					iLen, sum, pValue,
+					rb.warps, opt_Reg, GRID, BLOCK);
+			} else {
+				handle = read_kernel("LMEM_MSV.cuh");
+				opt_Reg = 64;
+				GRID = dim3(1, SMX, 1);
+				BLOCK = dim3(WARP_SIZE, 32, 1);
+				RTC_MSV(number, handle, hmm,
+					seq_1D, offset, seq_len,
+					iLen, sum, pValue,
+					32, opt_Reg, GRID, BLOCK);
+			}
+			break;
+		case 8:
+			if(hmm->M <= 200)
+			{
+				rb = get_opt_VIT(hmm->vitQ, MAX_SMEM, WARP_SIZE);
+	    			printf("SMEM VIT::warps per block: %d\n", rb.warps);
+	    			printf("SMEM VIT::resident blocks per SMX: %d\n", rb.res_blocks);
+	    			handle = read_kernel("SMEM_VIT.cuh");
+	    			opt_Reg = (65536/(WARP_SIZE * rb.warps * rb.res_blocks) > 255) ? 255 : (65536/(WARP_SIZE * rb.warps * rb.res_blocks));
+	    			printf("Available registers per thread is: %d\n", opt_Reg);
+	    			GRID = dim3(1, rb.res_blocks * SMX, 1);
+	      			BLOCK = dim3(WARP_SIZE, rb.warps, 1);
+				RTC_VIT(number, handle, hmm,
+					seq_1D, offset, seq_len,
+					iLen, sum, pValue,
+					rb.warps, opt_Reg, GRID, BLOCK);
+			} else {
+				handle = read_kernel("LMEM_VIT.cuh");
+				opt_Reg = 64;
+				GRID = dim3(1, SMX, 1);
+				BLOCK = dim3(WARP_SIZE, 32, 1);
+				RTC_VIT(number, handle, hmm,
+					seq_1D, offset, seq_len,
+					iLen, sum, pValue,
+					32, opt_Reg, GRID, BLOCK);
+			}
+			break;
+		case 9:
+			if(hmm->M <= 500)
+			{
+   				rb = get_opt_MSV(hmm->msvQ, MAX_SMEM, WARP_SIZE);			/* scalable for different device */
+    			printf("SMEM SSV::warps per block: %d\n", rb.warps);
+    			printf("SMEM SSV::resident blocks per SMX: %d\n", rb.res_blocks);
+
+    			handle = read_kernel("SMEM_SSV.cuh");	/* read SMEM */
+
+    			/* 65536 is hard-coded (need change to device property) */
+    			opt_Reg = (65536/(WARP_SIZE * rb.warps * rb.res_blocks) > 255) ? 255 : (65536/(WARP_SIZE * rb.warps * rb.res_blocks));
+    			printf("Available registers per thread is: %d\n", opt_Reg);
+
+    			GRID = dim3(1, rb.res_blocks * SMX, 1);
+      			BLOCK = dim3(WARP_SIZE, rb.warps, 1);		/* RIB & Resident blocks always change depending size of model for optimal */
+
+				RTC_SSV(number, handle, hmm,
+					    seq_1D, offset, seq_len,
+					    iLen, sum, pValue,
+					    rb.warps, opt_Reg, GRID, BLOCK);	/* optimal warps per block; 32 reg per thread (based on test); */	
+			} else {
+				handle = read_kernel("LMEM_SSV.cuh");		/* read LMEM */
+				opt_Reg = 64;
+
+				if ((hmm->msvQ > 15)&&(hmm->msvQ < 19))
+				  defect_RIB = 28;
+				else
+				  defect_RIB = 32;
+				GRID = dim3(1, SMX, 1);
+				BLOCK = dim3(WARP_SIZE, defect_RIB, 1);		/* [FIXED] one block per SMX, 1024 threads per block */
+
+				RTC_SSV(number, handle, hmm,
+					    seq_1D, offset, seq_len,
+					    iLen, sum, pValue,
+					    defect_RIB, opt_Reg, GRID, BLOCK);	/* 32 warps per block; 64 reg per thread; */
+			}
+			break;
 		default:
 				break;
 	}

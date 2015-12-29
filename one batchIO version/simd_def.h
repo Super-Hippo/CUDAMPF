@@ -65,7 +65,7 @@ static __device__ __forceinline__ int max_int16(int a)
 	return r;
 }
 
-/* Integrate "extract_uint8" and "reorder_unit16" */
+/* Integrate "extract_uint16" and "reorder_unit16" */
 static __device__ __forceinline__ int reorder_int16(int a)
 {
 	int r;
@@ -184,5 +184,26 @@ static __device__ __forceinline__ unsigned int reorder_uint8(unsigned int a)
 	return r;
 }
 
+/* Integrate "extract_uint8" and "reorder_unit8" */
+static __device__ __forceinline__ unsigned int reorder_uint8_ssv(unsigned int a)
+{
+	unsigned int r;
+	asm("{                                       \n\t" // volatile or NOT
+		".reg .u32    r, t;                      \n\t"
+		".reg .pred   p;						 \n\t"
+		"mov.b32      r, %1;                     \n\t" // r = 0xXXXXXXXX
+		"mov.b32      t, %1;                     \n\t" // t = 0xXXXXXXXX
+		"shr.u32      r, r, 24;                  \n\t" // to be 0x000000XX [i.e: r = 0000 0000 0000 0000 0000 0000 0000 0011 = 0x00 00 00 03]
+		// from [0x03 02 01 00] to [0x00 00 00 03]
+		"shfl.idx.b32 r, r, %laneid + 31, 0x1f;  \n\t" // hard-coded "width" = 32, so "c"=0x1f
+		"shl.b32      t, t, 8;                   \n\t" // t = 0xXXXXXX00 from [0x03 02 01 00] to [0x02 01 00 00]
+
+		"setp.eq.u32  p, %laneid + 0, 0;		 \n\t" // if (threadIdx.x == 0) there is a branch
+		"@p   mov.u32 r, 0x00000080;			 \n\t" // then r = 0x00 00 00 80 (for ssv only:0x80=10000000)
+		"or.b32      %0, t, r;                   \n\t" // merge t = 0xXXXXXX00 with r = 0x00000080 for next row
+		"}"
+		: "=r"(r) : "r"(a));      /* r is %0, a is %1 */
+	return r;
+}
 
 #endif /* SIMD_FUNS__ */

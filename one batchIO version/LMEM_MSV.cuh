@@ -11,7 +11,7 @@
 extern "C" __global__ void KERNEL(unsigned int* dseq, unsigned int total, unsigned int* doffset,													
 double* dsc, unsigned int* dL, unsigned int* dL_6r, unsigned int* dmat,										
 unsigned int dbase, unsigned int dbias, unsigned int dtbm, unsigned int dtec, 								
-float dscale, float mu, float lambda)																		
+float dscale, double mu, double lambda)																		
 {																											
 	volatile __shared__ unsigned int cache[RIB][32];														
 	unsigned int MMX[SIZE];																					

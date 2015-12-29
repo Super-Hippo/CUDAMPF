@@ -1,9 +1,9 @@
-﻿/* For reading useful data from .hmm files
-* Now only focus on the MSV filter
-*
-*
-*
-*/
+﻿/* Functions for reading data
+ * ==========================
+ * 1. read and parse hmm file.
+ * 2. read sequences data
+ * 3. all funcitons are designed as one-batch IO without optimized techniques.
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,8 +23,8 @@ int get_hmm_size(char* hmm_Path)
 {
 	char* LEN = "LENG";
 	FilePointer = fopen(hmm_Path, "r");
-	char* tag_len = (char*)malloc(5 * sizeof(char));    //read width of 5 bytes
-	char* lenTok = (char*)malloc(100 * sizeof(char));   //enough width of 100 bytes to ensure get accurate 'length'
+	char* tag_len = (char*)malloc(5 * sizeof(char));    // hard-coded
+	char* lenTok = (char*)malloc(100 * sizeof(char));   // hard-coded
 	int length = 0;
 
 	if (FilePointer == NULL) {
@@ -53,24 +53,20 @@ int get_hmm_size(char* hmm_Path)
 }
 
 /* Function:  get_Parameters()
-* Synopsis:  Read .hmm file and get specified data.
-*
-* Purpose:  We got several important parameters here:
-*           1. hmm->M
-*           2. hmm->MU[0,1,2]
-*           3. hmm->LAMBDA[0,1,2]
-* Returns:
-*
-*/
+ * Synopsis:  Read .hmm file and parse it.
+ *
+ * Purpose:  We got several important parameters here:
+ *           1. hmm->M
+ *           2. hmm->MU[0,1,2]
+ *           3. hmm->LAMBDA[0,1,2]
+ *
+ * Returns: None
+ */
 int get_Parameters(HMMER_PROFILE *hmm, char* hmm_Path)
 {
-	//int BITS;
-	//printf("%d", sizeof(BITS));
-	//getchar();
-
 	char* LEN = "LENG";
 	char* PARA_MSV = "STATS LOCAL MSV";
-	char* PARA_VIT = "STATS LOCAL VITERBI";   //Ã»×ö
+	char* PARA_VIT = "STATS LOCAL VITERBI";
 	char* PARA_FWD = "STATS LOCAL FORWARD";
 
 	FilePointer = fopen(hmm_Path, "r");
@@ -84,8 +80,8 @@ int get_Parameters(HMMER_PROFILE *hmm, char* hmm_Path)
 	}
 
 	/* 2. get MSV parameters */
-	char* tag_MSV = (char*)malloc(16 * sizeof(char)); //CAUTION: 16 is a dead data
-	char* MSVTok = (char*)malloc(100 * sizeof(char));
+	char* tag_MSV = (char*)malloc(16 * sizeof(char));	// hard-coded
+	char* MSVTok = (char*)malloc(100 * sizeof(char));	// hard-coded
 	char *p_msv;
 	do{
 		fgets(tag_MSV, 16, FilePointer);
@@ -95,27 +91,13 @@ int get_Parameters(HMMER_PROFILE *hmm, char* hmm_Path)
 	fgets(MSVTok, 100, FilePointer);
 
 	p_msv = strtok(MSVTok, "  ");
-	hmm->MU[0] = (float)atof(p_msv);
+	hmm->MU[0] = atof(p_msv);
 	p_msv = strtok(NULL, "  ");
-	hmm->LAMBDA[0] = (float)atof(p_msv);
-
-	/* demo for extracting values from a string
-	* ==============================================
-	* char* test1 = (char*)malloc(100*sizeof(char));
-	* fgets(test1, 100, FilePointer);
-	* char *p;
-	* p = strtok(test1, "  ");
-	* while(p)
-	* {
-	*  printf("%s\n", p);
-	*  p = strtok(NULL, "  ");
-	* }
-	* ==============================================
-	*/
+	hmm->LAMBDA[0] = atof(p_msv);
 
 	/* 3. get Viterbi parameters */
-	char* tag_VIT = (char*)malloc(20 * sizeof(char));
-	char* VITTok = (char*)malloc(100 * sizeof(char));
+	char* tag_VIT = (char*)malloc(20 * sizeof(char));	// hard-coded
+	char* VITTok = (char*)malloc(100 * sizeof(char));	// hard-coded
 	char *p_vit;
 	do{
 		fgets(tag_VIT, 20, FilePointer);
@@ -125,13 +107,13 @@ int get_Parameters(HMMER_PROFILE *hmm, char* hmm_Path)
 	fgets(VITTok, 100, FilePointer);
 
 	p_vit = strtok(VITTok, "  ");
-	hmm->MU[1] = (float)atof(p_vit);
+	hmm->MU[1] = atof(p_vit);
 	p_vit = strtok(NULL, "  ");
-	hmm->LAMBDA[1] = (float)atof(p_vit);
+	hmm->LAMBDA[1] = atof(p_vit);
 
 	/* 4. get Forward parameters */
-	char* tag_FWD = (char*)malloc(20 * sizeof(char));
-	char* FWDTok = (char*)malloc(100 * sizeof(char));
+	char* tag_FWD = (char*)malloc(20 * sizeof(char));	// hard-coded
+	char* FWDTok = (char*)malloc(100 * sizeof(char));	// hard-coded
 	char *p_fwd;
 	do{
 		fgets(tag_FWD, 20, FilePointer);
@@ -141,9 +123,9 @@ int get_Parameters(HMMER_PROFILE *hmm, char* hmm_Path)
 	fgets(FWDTok, 100, FilePointer);
 
 	p_fwd = strtok(FWDTok, "  ");
-	hmm->MU[2] = (float)atof(p_fwd);
+	hmm->MU[2] = atof(p_fwd);
 	p_fwd = strtok(NULL, "  ");
-	hmm->LAMBDA[2] = (float)atof(p_fwd);
+	hmm->LAMBDA[2] = atof(p_fwd);
 
 	printf("MSV MU: %f, LAMBDA: %f\n", hmm->MU[0], hmm->LAMBDA[0]);
 	printf("viterbi MU: %f, LAMBDA: %f\n", hmm->MU[1], hmm->LAMBDA[1]);
@@ -159,8 +141,13 @@ int get_Parameters(HMMER_PROFILE *hmm, char* hmm_Path)
 	return fileOK;
 }
 
-
-/* always move build-in pointer before FIRST character in next 'times'line */
+/* Function:  nextLine()
+ * Synopsis:  always move build-in pointer before FIRST character in next 'times' line
+ *
+ * Purpose: move to next line in file
+ *
+ * Returns: None
+ */
 void nextLine(FILE* pointer_2, int times)
 {
 	int moveChar;
@@ -174,7 +161,13 @@ void nextLine(FILE* pointer_2, int times)
 	}
 }
 
-/* move file curser back with 'times' chars */
+/* Function:  moveCursor()
+ * Synopsis:  move file curser back with 'times' chars
+ *
+ * Purpose: move cursor within the same line.
+ *
+ * Returns: None
+ */
 void moveCursor(FILE* pointer_2, int times)
 {
 	for (int i = 0; i < times; i++)
@@ -183,10 +176,13 @@ void moveCursor(FILE* pointer_2, int times)
 	}
 }
 
-/* Function:  get_MatchEmission()
-* Synopsis:  Read .hmm file and get specified data.
-*
-*/
+/* Function:  get_Emission()
+ * Synopsis:  get Emission score for INSERT and MATCH states
+ *
+ * Purpose: parse the .hmm file and extract data
+ *
+ * Returns: None
+ */
 int get_Emission(HMMER_PROFILE *hmm, char* hmm_Path)
 {
 	char* BEGIN = "  COMPO   ";
@@ -205,7 +201,7 @@ int get_Emission(HMMER_PROFILE *hmm, char* hmm_Path)
 	}
 
 	/* 1. locate the 'COMPO' */
-	char* locate = (char*)malloc(11 * sizeof(char));
+	char* locate = (char*)malloc(11 * sizeof(char));	// hard-coded
 	do{
 		fgets(locate, 11, FilePointer);
 		if (strcmp(locate, BEGIN))
@@ -213,10 +209,10 @@ int get_Emission(HMMER_PROFILE *hmm, char* hmm_Path)
 	} while (strcmp(locate, BEGIN) && !feof(FilePointer));
 
 	/* 2. Process node 0 for I (no M here) */
-	char* m_Temp = (char*)malloc(179 * sizeof(char));
+	char* m_Temp = (char*)malloc(179 * sizeof(char));	// hard-coded
 	char* match;
 
-	char* i_Temp = (char*)malloc(179 * sizeof(char));
+	char* i_Temp = (char*)malloc(179 * sizeof(char));	// hard-coded
 	char* insert;
 
 	nextLine(FilePointer, 1);
@@ -225,7 +221,6 @@ int get_Emission(HMMER_PROFILE *hmm, char* hmm_Path)
 	fgets(i_Temp, 179, FilePointer);
 	insert = strtok(i_Temp, "  ");
 	while (insert) {
-		//printf("%s\n", insert);
 		hmm->ins_32bits[0][i] = expf(-1.0 * (float)atof(insert));
 		i++;
 		insert = strtok(NULL, "  ");
@@ -277,6 +272,13 @@ int get_Emission(HMMER_PROFILE *hmm, char* hmm_Path)
 	return fileOK;
 }
 
+/* Function:  get_transition()
+ * Synopsis:  get transition scores
+ *
+ * Purpose: parse the .hmm file and extract data
+ *
+ * Returns: None
+ */
 int get_transition(HMMER_PROFILE *hmm, char* hmm_Path)
 {
 	int i;
@@ -293,7 +295,7 @@ int get_transition(HMMER_PROFILE *hmm, char* hmm_Path)
 	}
 
 	/* 1. locate the line of 1st stage */
-	char* locate = (char*)malloc(11 * sizeof(char));
+	char* locate = (char*)malloc(11 * sizeof(char));	// hard-coded
 	do{
 		fgets(locate, 11, FilePointer);
 		if (strcmp(locate, BEGIN))
@@ -302,7 +304,7 @@ int get_transition(HMMER_PROFILE *hmm, char* hmm_Path)
 
 	nextLine(FilePointer, 2);
 
-	char* t_Temp = (char*)malloc(72 * sizeof(char));
+	char* t_Temp = (char*)malloc(72 * sizeof(char));	// hard-coded
 	char* p;
 
 	/* 2. Process node 0 */
@@ -376,7 +378,13 @@ int get_transition(HMMER_PROFILE *hmm, char* hmm_Path)
 }
 
 
-/* Function:  get_Seqnumber() */
+/* Function:  get_Seqnumber()
+ * Synopsis:  count the total number of sequences in the database files
+ *
+ * Purpose: parse the protein database file
+ *
+ * Returns: the number of sequences
+ */
 int get_Seqnumber(char* seq_Path)
 {
 	int fileChar = 0;
@@ -406,7 +414,13 @@ int get_Seqnumber(char* seq_Path)
 	return times;
 }
 
-/* dynamic memory allocation for each sequence on host */
+/* Function:  alloc_Eachseq()
+ * Synopsis:  dynamic memory allocation for each sequence on host
+ *
+ * Purpose: C-style memory allocation
+ *
+ * Returns: None
+ */
 int alloc_Eachseq(char** addr, unsigned int* len_, int num, char* seq_Path)
 {
 	int fileChar = 0;
@@ -451,7 +465,13 @@ int alloc_Eachseq(char** addr, unsigned int* len_, int num, char* seq_Path)
 	return fileOK;
 }
 
-/* cache each sequence into corresponding position */
+/* Function:  fill_Eachseq()
+ * Synopsis:  cache each sequence into corresponding position
+ *
+ * Purpose: C-style memory allocation
+ *
+ * Returns: None
+ */
 int fill_Eachseq(char** addr, unsigned int* len_, int num, char* seq_Path)
 {
 	int fileChar = 0;
@@ -493,7 +513,13 @@ int fill_Eachseq(char** addr, unsigned int* len_, int num, char* seq_Path)
 	return fileOK;
 }
 
-// read the .cu file and convert kernel content to char* array
+/* Function:  read_kernel()
+ * Synopsis:  read the .cu file and convert kernel content to char* array
+ *
+ * Purpose: For NVRTC, compile kernel dynamically. C++ style.
+ *
+ * Returns: string of kernel
+ */
 char* read_kernel(char *filename)
 {
 	StopWatchInterface *timer;
