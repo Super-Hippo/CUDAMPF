@@ -21,7 +21,10 @@ Model files must be **Profile HMM** format (usually with ".hmm" extension), whic
 
 ![hmm.png]({{site.baseurl}}/hmm.png)
 
-In folder [query models](https://github.com/Super-Hippo/CUDAMPF/tree/master/quey%20models), we have aleady provided 24 HMM models with different length, whcih are also benchmarking models in our paper.
+In folder [query models](https://github.com/Super-Hippo/CUDAMPF/tree/master/quey%20models), there are 24 HMM models with different length provided.
+
+###Notes
+Please make sure paths of library and compiler correct and detectable when using **Makefile** to compile whole project: ```make all```.(i.e, **CUDA_PATH**, **LIBRARIES**, **INCLUDES**, **HOST_COMPILER** and **NVCC**)
 
 
 
