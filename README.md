@@ -38,3 +38,5 @@ Any questions about the project please send email to: hjiang5 AT stevens DOT edu
 
 ##Licence
 Please check the [MIT License for CUDAMPF.](docs/License)
+
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.46014.svg)](http://dx.doi.org/10.5281/zenodo.46014)
