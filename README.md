@@ -1,11 +1,15 @@
 # CUDAMPF
-the source code of our project
-==========================================
-1. Requirement <br />
-OS: Linux <br />
-Compilers: GCC, G++, NVCC <br />
-CUDA: Version 7.0 <br />
-Hardware: device with Compute Capability 3.5 or higher (at least GK110 Kepler architecture) <br />
+###Requirements
+1. **Operating system(s)**: Linux
+2. **Programming language(s)**: CUDA C/C++, PTX assembly
+3. **Other requirement(s)**: CUDA 7.0 or later, GCC/G++ 4.4.7 or later, CUDA-
+enabled GPUs with Compute Capability of 3.5 or higher
+4. **License**: GNU GPL v3.0
+
+###Run code
+
+
+
 
 2. How to use this project <br />
 Please make sure the path correct when using makefile to compile whole project. <br />
@@ -18,4 +22,3 @@ Another version of code with batchIO will be uploaded for loading large database
 Database file can be downloaded here: ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam27.0/ <br />
 
 <br /> Any questions about the project please send email to: hjiang5 AT stevens DOT edu <br />
-
