@@ -24,8 +24,8 @@ Model files must be **Profile HMM** format (usually with ".hmm" extension), whic
 In folder [query models](https://github.com/Super-Hippo/CUDAMPF/tree/master/quey%20models), there are 24 HMM models with different length provided.
 
 ###Notes
-1. Please make sure paths of library and compiler correct and detectable when using **Makefile** to compile whole project: ```make all```.(i.e, **CUDA_PATH**, **LIBRARIES**, **INCLUDES**, **HOST_COMPILER** and **NVCC**)
-2. item
+1. Please make sure paths of library and compiler correct and detectable when using **Makefile** to compile whole project: ```make all```.(i.e, CUDA_PATH, LIBRARIES, INCLUDES, HOST_COMPILER and NVCC)
+2. Keep all kernel files (i.e, LMEM_MSV.cuh) in the same project folder. Otherwise, it will raise an error ```unable to open LMEM_MSV.cuh for reading!```
 3. item
 
 
