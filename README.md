@@ -1,4 +1,6 @@
 # CUDAMPF
+###Latest release
+v1.0.1 (Date: Feb 12th, 2016)
 ###Requirements
 1. **Operating system(s)**: Linux
 2. **Programming language(s)**: CUDA C/C++, PTX assembly
@@ -26,13 +28,14 @@ In folder [query models](https://github.com/Super-Hippo/CUDAMPF/tree/master/quey
 ###Notes
 1. Please make sure paths of library and compiler correct and detectable when using **Makefile** to compile whole project: ```make all```.(i.e, CUDA_PATH, LIBRARIES, INCLUDES, HOST_COMPILER and NVCC)
 2. Keep all kernel files (i.e, LMEM_MSV.cuh) in the same project folder. Otherwise, it will raise an error ```unable to open LMEM_MSV.cuh for reading!```
-3. item
+3. Current release ```v1.0.1``` only contains the code for one-batch benchmarking. Streaming benchmarking will be released in subsequent version.
+4. Data preprocessing on host side are not optimized (i.e, sequence/model format), which are only plain implementations to guarantee all inputs correct. 
+5. ```kernel time: xxxx(ms)``` indicates the consuming time on device.
+6. Final results show the number of sequence pass through selected filter, which is 100% same as ```hmmsearch``` . Anyone wants to check out P-value for each sequence may modify ```RTC_XXX.cpp``` and print out variable ```p_value```.
 
+###Contact
+Any questions about the project please send email to: hjiang5 AT stevens DOT edu
 
+##Licence
+Please check the GNU License for CUDAMPF.
 
-
-3. Note <br />
-Another version of code with batchIO will be uploaded for loading large database in several times by using streaming, and it is able to fully cover the time consumption of data pre-process. <br />
-Database file can be downloaded here: ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam27.0/ <br />
-
-<br /> Any questions about the project please send email to: hjiang5 AT stevens DOT edu <br />
