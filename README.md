@@ -7,6 +7,15 @@ enabled GPUs with Compute Capability of 3.5 or higher
 4. **License**: GNU GPL v3.0
 
 ###Run code
+```
+CUDAMPF [filterOpt] [modelOpt] [databaseOpt]
+```
+There are three filter options:
+- "**-ssv**": Single Segment Viterbi filter (since HMMER3.1)
+- "**-msv**": Multiple Segment Viterbi filter (since HMMER3.0)
+- "**-vit**": Full P7Viterbi filter (since HMMER3.0)
+
+Sequence database file must be FASTA format. An available protein sequence database is here: [ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam27.0/](ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam27.0/)
 
 
 
