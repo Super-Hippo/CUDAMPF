@@ -31,7 +31,7 @@ In folder [query models](https://github.com/Super-Hippo/CUDAMPF/tree/master/quey
 3. Current release ```v1.0.1``` only contains the code for one-batch benchmarking. Streaming benchmarking will be released in subsequent version.
 4. Data preprocessing on host side are not optimized (i.e, sequence/model format), which are only plain implementations to guarantee all inputs correct. 
 5. ```kernel time: xxxx(ms)``` indicates the consuming time on device.
-6. Final results show the number of sequence pass through selected filter, which is 100% same as ```hmmsearch``` . Anyone wants to check out P-value for each sequence may modify ```RTC_XXX.cpp``` and print out variable ```p_value```.
+6. Final results show the number of sequence pass through filters, which is 100% same as ```hmmsearch``` . Anyone wants to check out P-value for each sequence may modify ```RTC_XXX.cpp``` and print out variable ```p_value```.
 
 ###Contact
 Any questions about the project please send email to: hjiang5 AT stevens DOT edu
