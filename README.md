@@ -6,7 +6,7 @@ v1.0.1 (Date: Feb 12th, 2016)
 2. **Programming language(s)**: CUDA C/C++, PTX assembly
 3. **Other requirement(s)**: CUDA 7.0 or later, GCC/G++ 4.4.7 or later, CUDA-
 enabled GPUs with Compute Capability of 3.5 or higher
-4. **License**: GNU GPL v3.0
+4. **License**: MIT License
 
 ###Run code
 ```
@@ -37,4 +37,4 @@ In folder [query models](https://github.com/Super-Hippo/CUDAMPF/tree/master/quey
 Any questions about the project please send email to: hjiang5 AT stevens DOT edu
 
 ##Licence
-Please check the GNU License for CUDAMPF.
+Please check the [MIT License for CUDAMPF.](docs/License)
