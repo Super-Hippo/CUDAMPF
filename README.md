@@ -16,7 +16,12 @@ There are three filter options:
 - "**-vit**": Full P7Viterbi filter (since HMMER3.0)
 
 Sequence database file must be **FASTA** format. An available protein sequence database is here: [ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam27.0/](ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam27.0/)
+
 Model files must be **Profile HMM** format (usually with ".hmm" extension), which looks like:
+
+![hmm.png]({{site.baseurl}}/hmm.png)
+
+In folder [query models](https://github.com/Super-Hippo/CUDAMPF/tree/master/quey%20models), we have aleady provided 24 HMM models with different length, whcih are also benchmarking models in our paper.
 
 
 
