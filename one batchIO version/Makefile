@@ -298,7 +298,7 @@ GEN = -gencode arch=compute_35,code=compute_35 -gencode arch=compute_35,code=sm_
 # Target rules
 all: build
 
-build: integrated_MSV_VIT
+build: CUDAMPF
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)
@@ -310,14 +310,14 @@ endif
 %.o: %.cpp $(DEPS)
 	$(EXEC) $(HOST_COMPILER) $(INCLUDES) $(CCFLAGS) $(EXTRA_CCFLAGS) -o $@ -c $< $(CFLAGS)
 
-integrated_MSV_VIT: $(OBJ)
+CUDAMPF: $(OBJ)
 	$(EXEC) $(HOST_COMPILER) $(LDFLAGS) -o $@ $+ $(LIBRARIES) $(CFLAGS)
 
 run: build
-	$(EXEC) ./integrated_MSV_VIT
+	$(EXEC) ./CUDAMPF
 
 clean:
-	rm -f integrated_MSV_VIT $(OBJ) *.o
+	rm -f CUDAMPF $(OBJ) *.o
 
 clobber: clean
 
