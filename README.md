@@ -21,7 +21,7 @@ Sequence database file must be **FASTA** format. An available protein sequence d
 
 Model files must be **Profile HMM** format (usually with ".hmm" extension), which looks like:
 
-![]({{site.baseurl}}/https://drive.google.com/file/d/0By-gRM64CmBjOFV1SXd4bnUya3M/view?usp=sharing)
+![]({{site.baseurl}}//docs/hmm.png)
 
 In folder [query models](https://github.com/Super-Hippo/CUDAMPF/tree/master/quey%20models), there are 24 HMM models with different length provided.
 
@@ -38,4 +38,3 @@ Any questions about the project please send email to: hjiang5 AT stevens DOT edu
 
 ##Licence
 Please check the GNU License for CUDAMPF.
-
