@@ -19,7 +19,7 @@ Sequence database file must be **FASTA** format. An available protein sequence d
 
 Model files must be **Profile HMM** format (usually with ".hmm" extension), which looks like:
 
-![hmm.png]({{site.baseurl}}/hmm.png)
+![]({{site.baseurl}}/https://drive.google.com/file/d/0By-gRM64CmBjOFV1SXd4bnUya3M/view?usp=sharing)
 
 In folder [query models](https://github.com/Super-Hippo/CUDAMPF/tree/master/quey%20models), there are 24 HMM models with different length provided.
 
@@ -30,15 +30,6 @@ In folder [query models](https://github.com/Super-Hippo/CUDAMPF/tree/master/quey
 
 
 
-
-
-
-
-2. How to use this project <br />
-Please make sure the path correct when using makefile to compile whole project. <br />
-Please modify the file paths of database and *.hmm in the main_function.cpp manually. <br />
-Please use "./integrated_MSV_VIT <1 or 2 or 3 or 4 or 5 or 6 or 7 or 8 or 9> <.hmm file path> <database file path>" in local folder to run the program. <br />
-"1" means MSV+local only; "2" means MSV+shared only; "3" means VIT+local only; "4" means VIT+shared only; "5" means SSV+local only; "6" means SSV+shared only; "7" means MSV+switch; "8" means VIT+switch; "9" means SSV+switch; <br />
 
 3. Note <br />
 Another version of code with batchIO will be uploaded for loading large database in several times by using streaming, and it is able to fully cover the time consumption of data pre-process. <br />
