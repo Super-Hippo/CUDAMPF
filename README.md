@@ -15,7 +15,9 @@ There are three filter options:
 - "**-msv**": Multiple Segment Viterbi filter (since HMMER3.0)
 - "**-vit**": Full P7Viterbi filter (since HMMER3.0)
 
-Sequence database file must be FASTA format. An available protein sequence database is here: [ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam27.0/](ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam27.0/)
+Sequence database file must be **FASTA** format. An available protein sequence database is here: [ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam27.0/](ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam27.0/)
+Model files must be **Profile HMM** format (usually with ".hmm" extension), which looks like:
+
 
 
 
